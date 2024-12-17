@@ -22,6 +22,7 @@ public class MyThread extends Thread {
     String version;
     String responseHeader;
     byte[] responseBody;
+    int statusCode = 200;
 
     public MyThread(Socket socket) {
         this.socket = socket;
@@ -48,11 +49,7 @@ public class MyThread extends Thread {
             File file = getFile(resource);
             responseBody = getFileStream(file);
 
-            out.writeBytes("HTTP/1.1 "+ responseHeader + System.lineSeparator());
-            out.writeBytes("Content-Type: " + getContentType(file) + System.lineSeparator());
-            out.writeBytes("Content-Length: " + responseBody.length + System.lineSeparator());
-            out.writeBytes(System.lineSeparator());
-            out.write(responseBody);
+            webResponse(file, file.getPath());
 
             // closing resources
             socket.close();
@@ -63,18 +60,35 @@ public class MyThread extends Thread {
 
     public File getFile(String resource) {
         String basePath = "docs/progettoBootstrap";
+        String rs = "";
+        switch (resource) {
+            case "/":
+            case "/index":
+            case "/index/":
+                statusCode = 301;
+                rs = "/index.html";
+                break;
 
+            case "/pages":
+            case "/pages/":
+                statusCode = 301;
+                rs = "/pages/fnaf1.html";
+                break;
+
+            default:
+                rs = resource;
+        }
         return new File(
-            basePath +
-            (resource.equals("/")
-                ? "/index.html" 
-                : resource
-            )
+            basePath += rs
         );
     }
 
     public byte[] getFileStream(File file) throws IOException {
-        if (file == null || !file.exists() || file.isDirectory()) return "<html><body><h1>404 Not Found</h1></body></html>".getBytes();
+        System.out.println(file.getPath());
+        if (file == null || !file.exists() || file.isDirectory()){
+            statusCode = 404;
+            return "<html><body><h1>404 Not Found</h1></body></html>".getBytes();
+        } 
 
         InputStream input = new FileInputStream(file);
         byte[] buffer = new byte[200000];
@@ -95,5 +109,52 @@ public class MyThread extends Thread {
         }
 
         return URLConnection.guessContentTypeFromName(file.getName());
+    }
+
+    public void sendRedirect(String location) throws IOException {
+        String redirectResponse = "HTTP/1.1 301 Moved Permanently\r\n" +  // 301 per reindirizzamento permanente
+                                  "Location: " + location + "\r\n" +
+                                  "Content-Length: 0\r\n" +
+                                  "\r\n";
+        out.writeBytes(redirectResponse);
+        socket.close();
+    }
+
+    public void webResponse(File file, String path ) throws IOException{
+        switch (statusCode) {
+            case 200:
+                out.writeBytes("HTTP/1.1 "+ statusCode + " OK " + System.lineSeparator());
+                out.writeBytes("Content-Type: " + getContentType(file) + System.lineSeparator());
+                out.writeBytes("Content-Length: " + responseBody.length + System.lineSeparator());
+                out.writeBytes(System.lineSeparator());
+                out.write(responseBody);
+                break;
+            
+            case 301:
+                out.writeBytes("HTTP/1.1 "+ statusCode + " Moved Permanently " + System.lineSeparator());
+                out.writeBytes("Content-Type: " + getContentType(file) + System.lineSeparator());
+                out.writeBytes("Location: " + path + System.lineSeparator());
+                out.writeBytes("Content-Length: " + responseBody.length + System.lineSeparator());
+                out.writeBytes(System.lineSeparator());
+                out.write(responseBody);
+                break;
+
+            case 404:
+                out.writeBytes("HTTP/1.1 "+ statusCode + " Not Found " + System.lineSeparator());
+                out.writeBytes("Content-Type: " + getContentType(file) + System.lineSeparator());
+                out.writeBytes("Location: " + path + System.lineSeparator());
+                out.writeBytes("Content-Length: " + responseBody.length + System.lineSeparator());
+                out.writeBytes(System.lineSeparator());
+                out.write(responseBody);
+                break;
+
+            default:
+                out.writeBytes("HTTP/1.1 "+ responseHeader + System.lineSeparator());
+                out.writeBytes("Content-Type: " + getContentType(file) + System.lineSeparator());
+                out.writeBytes("Content-Length: " + responseBody.length + System.lineSeparator());
+                out.writeBytes(System.lineSeparator());
+                out.write(responseBody);
+                break;
+        }
     }
 }
