@@ -1,102 +1,99 @@
 package com.example;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.net.URLConnection;
 
 public class MyThread extends Thread {
-    
-    private Socket s;
+
     BufferedReader in;
     DataOutputStream out;
-    String s1;
+    Socket socket;
+    String header;
     String method;
     String resource;
     String version;
+    String responseHeader;
+    byte[] responseBody;
 
-    public MyThread(Socket s) throws IOException{
-        this.s = s;
-        this.in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        this.out = new DataOutputStream(s.getOutputStream());
+    public MyThread(Socket socket) {
+        this.socket = socket;
     }
-
-    public void run(){
+    public void run() {
         try {
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            out = new DataOutputStream(socket.getOutputStream());
 
             String firstLine = in.readLine();
             System.out.println(firstLine);
-            String[] lines = firstLine.split(" ");
+            String[] request = firstLine.split(" ");
 
-            method = lines[0];
-            resource = lines[1];
-            version = lines[2];
+            method = request[0];
+            resource = request[1];
+            version = request[2];
 
-            do{
-                s1 = in.readLine();
-                System.out.println(s1);
-            }while(!s1.isEmpty());
-            System.out.println("ended");
+            do {
+                header = in.readLine();
+                System.out.println(header);
+            } while (!header.isEmpty());
+            System.out.println("Request ended");
 
-            String response = "";
-            String head = "";
-            String code = "";
-            int length = 0;
-            String type = "";
-            
-            String end = "";
+            File file = getFile(resource);
+            responseBody = getFileStream(file);
 
-            switch (resource) {
-                case "/":
-                case "/index.html":
-                    response = "<h1>Ciaoooooooo, Loda Kurumi, mi raccommando</h1>\n";
-                    code = "200 OK";
-                    length = response.length();
-                    type = "text/html";
-                    break;
+            out.writeBytes("HTTP/1.1 "+ responseHeader + System.lineSeparator());
+            out.writeBytes("Content-Type: " + getContentType(file) + System.lineSeparator());
+            out.writeBytes("Content-Length: " + responseBody.length + System.lineSeparator());
+            out.writeBytes(System.lineSeparator());
+            out.write(responseBody);
 
-                case "/file.txt":
-                    response = "Ecco un testo random\n";
-                    code = "200 OK";
-                    length = response.length();
-                    type = "text/plain";
-                    break;
-
-                case "/kurumi":
-                case "/kurumi.html":
-                    File file = new File("src/docs/index.html");
-                    InputStream input = new FileInputStream(file);
-                    byte[] buf = new byte[8192];
-                    int n;
-                    while ((n = input.read(buf)) != -1) {
-                        response += new String(buf, 0, n);
-                    }
-                    break;
-
-                default:
-                    response = "<h1>404 NOT FOUND</h1> </br> <p>cerca da un'altra parte, coglione</p>\n";
-                    code = "404 not found";
-                    length = response.length();
-                    type = "text/plain";
-                    break;
-                }
-                head = "HTTP/1.1 " + code + "\n" +
-                        "Cotent-Type: " + type + "\n" +
-                        "Cotent-Length: " + length + "\n" +
-                        "\n";
-                end = head + response;
-                out.writeBytes(end);
-            s.close();
-        } catch (IOException e) {
+            // closing resources
+            socket.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    public File getFile(String resource) {
+        String basePath = "docs/progettoBootstrap";
+
+        return new File(
+            basePath +
+            (resource.equals("/")
+                ? "/index.html" 
+                : resource
+            )
+        );
+    }
+
+    public byte[] getFileStream(File file) throws IOException {
+        if (file == null || !file.exists() || file.isDirectory()) return "<html><body><h1>404 Not Found</h1></body></html>".getBytes();
+
+        InputStream input = new FileInputStream(file);
+        byte[] buffer = new byte[200000];
+        
+        int bytesRead;
+        ByteArrayOutputStream responseContent = new ByteArrayOutputStream();
+        while ((bytesRead = input.read(buffer)) != -1) {
+            responseContent.write(buffer, 0, bytesRead);
+        }
+
+        input.close();
+        return responseContent.toByteArray();
+    }
+
+    public String getContentType(File file) {
+        if (file == null || !file.exists() || file.isDirectory()) {
+            return "unknown";
+        }
+
+        return URLConnection.guessContentTypeFromName(file.getName());
+    }
 }

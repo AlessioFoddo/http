@@ -1,0 +1,168 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body{
+    height: 100%;
+    width: 100%;
+}
+
+.spazio{
+  margin-top: 30vh;
+}
+
+.inizio{
+  background-image: url(../images/sfondoFinale.webp);
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.static{
+  background-image: url(../images/statica.png);
+  background-size: cover;
+}
+
+.among-us{
+  width: 25px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+.cams{
+  height: 95%;
+}
+
+.row-cams{
+  width: 86%;
+}
+
+.scott{
+  font-family: 'Bungee', cursive;
+}
+
+.titolo{
+  font-family: 'Rubik Glitch', cursive;
+}
+
+.faces{
+  background-image: url(../images/faces/static.jpg);
+  background-size: cover;
+}
+
+.personaggio:hover{
+  opacity: .5;
+}
+
+.nome{
+  font-family: 'Poltawski Nowy', serif;
+}
+
+.fnaf5-logo img{
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+.SCOPERTA{
+  font-family: 'Rubik Glitch', cursive;
+}
+
+.fnaf1{
+  background-image: url(../images/fnaf1Sfondo.jpg);
+  background-size: cover;
+}
+
+.fnaf2{
+  background-image: url(../images/fnaf2Sfondo.jpg);
+  background-size: cover;
+}
+
+.alter-toy-chica:hover{
+  content: url(../images/faces/ToyChica2-B.png);
+}
+
+.alter-ennard:hover{
+  content: url(../images/personaggi/jumpascareEnnard5-B.webp);
+}
+
+.alter-nightmare-chica:hover{
+  content: url(../images/faces/Jack-O-Chica4.png);
+}
+
+.alter-nightmare-bonnie:hover{
+  content: url(../images/faces/Jack-O-Bonnie4.png);
+}
+
+.alter-plushtrap:hover{
+  content: url(../images/faces/Plushtrap4-B.png);
+}
+
+.alter-N-Bonnie-personaggio:hover{
+  content: url(../images/personaggi/nightmareBonnie4-B.png);
+}
+
+.alter-N-Chica-personaggio:hover{
+  content: url(../images/personaggi/nightmareChica4-B.png);
+}
+
+.alter-T-Chica-personaggio:hover{
+  content: url(../images/personaggi/toyChica2-B.png);
+}
+
+.fnaf3{
+  background-image: url(../images/fnaf3Sfondo.jpg);
+  background-size: cover;
+}
+
+.fnaf4{
+  background-image: url(../images/fnaf4Sfondo.jpg);
+  background-size: cover;
+}
+
+.fnaf5{
+  background-image: url(../images/fnaf5Sfondo.jpg);
+  background-size: cover;
+}
+
+/* easter egg start */
+
+#easterEgg{
+  background-color: black;
+}
+
+#easterEgg nav img{
+  width: 20vmin;
+  height: 20vmin;
+}
+
+#easterEgg .container{
+  margin-top: 10%;
+}
+
+#easterEgg .container img{
+  width: 100%;
+}
+
+/* easter egg end */
+
+/* media queries start */
+
+@media all and (max-width: 1199px) {
+  .bg-container .easterEggLink{
+      right: 10vw;
+  }
+  
+  .bg-container .easterEggLink img{
+      width: 4vmin;
+  }
+}
+
+/* media queries end */
+
+@media only screen and (min-width: 1200px) {
+  .descrizione{
+    background-image: url(../images/SfondoPersonaggi.webp);
+    background-size: cover;
+  }
+}
