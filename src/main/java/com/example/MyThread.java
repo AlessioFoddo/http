@@ -49,7 +49,7 @@ public class MyThread extends Thread {
             File file = getFile(resource);
             responseBody = getFileStream(file);
 
-            webResponse(file, file.getPath());
+            webResponse(file);
 
             // closing resources
             socket.close();
@@ -65,13 +65,11 @@ public class MyThread extends Thread {
             case "/":
             case "/index":
             case "/index/":
-                statusCode = 301;
                 rs = "/index.html";
                 break;
 
             case "/pages":
             case "/pages/":
-                statusCode = 301;
                 rs = "/pages/fnaf1.html";
                 break;
 
@@ -120,7 +118,7 @@ public class MyThread extends Thread {
         socket.close();
     }
 
-    public void webResponse(File file, String path ) throws IOException{
+    public void webResponse(File file) throws IOException{
         switch (statusCode) {
             case 200:
                 out.writeBytes("HTTP/1.1 "+ statusCode + " OK " + System.lineSeparator());
@@ -133,7 +131,7 @@ public class MyThread extends Thread {
             case 301:
                 out.writeBytes("HTTP/1.1 "+ statusCode + " Moved Permanently " + System.lineSeparator());
                 out.writeBytes("Content-Type: " + getContentType(file) + System.lineSeparator());
-                out.writeBytes("Location: " + path + System.lineSeparator());
+                out.writeBytes("Location: " + file.getPath() + System.lineSeparator());
                 out.writeBytes("Content-Length: " + responseBody.length + System.lineSeparator());
                 out.writeBytes(System.lineSeparator());
                 out.write(responseBody);
@@ -142,7 +140,6 @@ public class MyThread extends Thread {
             case 404:
                 out.writeBytes("HTTP/1.1 "+ statusCode + " Not Found " + System.lineSeparator());
                 out.writeBytes("Content-Type: " + getContentType(file) + System.lineSeparator());
-                out.writeBytes("Location: " + path + System.lineSeparator());
                 out.writeBytes("Content-Length: " + responseBody.length + System.lineSeparator());
                 out.writeBytes(System.lineSeparator());
                 out.write(responseBody);
